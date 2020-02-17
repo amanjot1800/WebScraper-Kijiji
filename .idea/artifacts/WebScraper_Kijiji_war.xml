@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="WebScraper-Kijiji:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>WebScraper-Kijiji</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="WebScraper-Kijiji-1.0.war">
+      <element id="artifact" artifact-name="WebScraper-Kijiji:war exploded" />
+    </root>
+  </artifact>
+</component>
