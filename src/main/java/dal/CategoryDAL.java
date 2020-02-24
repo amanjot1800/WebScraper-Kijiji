@@ -34,4 +34,10 @@ public class CategoryDAL extends GenericDAL<Category> {
         map.put("title", title);
         return findResult( "Category.findByTitle", map);
     }
+
+    public List<Category> findContaining(String search) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("search",search);
+        return findResults("Category.findContaining",map);
+    }
 }

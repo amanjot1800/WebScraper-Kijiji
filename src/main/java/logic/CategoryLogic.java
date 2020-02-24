@@ -39,11 +39,9 @@ public class CategoryLogic extends GenericLogic<Category,CategoryDAL> {
         return get(()-> dao().findByUrl(url));
     }
 
-
-   /* public List<Category> search(String search) {
-        return get(()-> dao().find(search));
-    }*/
-
+    public List<Category> search(String search){
+        return get(()->dao().findContaining(search));
+    }
 
     @Override
     public Category createEntity(Map<String, String[]> parameterMap) {

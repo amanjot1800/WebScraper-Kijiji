@@ -24,6 +24,7 @@ import javax.validation.constraints.Size;
     @NamedQuery(name = "Image.findById", query = "SELECT i FROM Image i WHERE i.id = :id"),
     @NamedQuery(name = "Image.findByUrl", query = "SELECT i FROM Image i WHERE i.url = :url"),
     @NamedQuery(name = "Image.findByPath", query = "SELECT i FROM Image i WHERE i.path = :path"),
+    @NamedQuery(name = "Image.findContaining", query = "SELECT i FROM Image i WHERE i.name like CONCAT('%',:search,'%')"),
     @NamedQuery(name = "Image.findByName", query = "SELECT i FROM Image i WHERE i.name = :name")})
 public class Image implements Serializable {
 

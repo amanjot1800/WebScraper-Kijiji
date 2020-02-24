@@ -36,6 +36,8 @@ import javax.validation.constraints.Size;
     @NamedQuery(name = "Item.findByLocation", query = "SELECT i FROM Item i join fetch i.category join fetch i.image WHERE i.location = :location"),
     @NamedQuery(name = "Item.findByDescription", query = "SELECT i FROM Item i join fetch i.category join fetch i.image WHERE i.description = :description"),
     @NamedQuery(name = "Item.findByUrl", query = "SELECT i FROM Item i join fetch i.category join fetch i.image WHERE i.url = :url"),
+    @NamedQuery(name = "Item.findContaining", query = "SELECT i FROM Item i WHERE i.title like CONCAT('%',:search,'%') or i.price like CONCAT('%',:search,'%') or i.date like CONCAT('%',:search,'%') or "
+                + "i.location like CONCAT('%',:search,'%') or i.description like CONCAT('%',:search,'%')"),
     @NamedQuery(name = "Item.findByCategory", query = "SELECT i FROM Item i join fetch i.category join fetch i.image WHERE i.category.id = :categoryid")})
 public class Item implements Serializable {
 
@@ -48,7 +50,6 @@ public class Item implements Serializable {
     @Column(name = "price")
     private BigDecimal price;
     @Basic(optional = false)
-    @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "title")
     private String title;

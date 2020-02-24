@@ -3,8 +3,6 @@ package view;
 import entity.Account;
 import entity.Category;
 import entity.Item;
-import logic.AccountLogic;
-import logic.CategoryLogic;
 import logic.ItemLogic;
 
 import java.io.IOException;
@@ -37,6 +35,10 @@ public class CreateItem extends HttpServlet {
             out.println("<div style=\"text-align: center;\">");
             out.println("<div style=\"display: inline-block; text-align: left;\">");
             out.println("<form method=\"post\">");
+
+            out.println("ID:<br>");
+            out.printf("<input type=\"text\" name=\"%s\" value=\"\"><br>", ItemLogic.ID);
+            out.println("<br>");
 
             out.println("Item Title:<br>");
             out.printf("<input type=\"text\" name=\"%s\" value=\"\"><br>", ItemLogic.TITLE);

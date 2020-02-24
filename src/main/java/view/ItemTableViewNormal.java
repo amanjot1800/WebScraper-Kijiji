@@ -46,7 +46,7 @@ public class ItemTableViewNormal extends HttpServlet {
             out.printf("<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>", logic.getColumnNames().toArray());
 
             out.println("</table>");
-            out.printf("<div style=\"text-align: center;\"><pre>%s</pre></div>", toStringMap(request.getParameterMap()));
+           // out.printf("<div style=\"text-align: center;\"><pre>%s</pre></div>", toStringMap(request.getParameterMap()));
             out.println("</body>");
             out.println("</html>");
         }

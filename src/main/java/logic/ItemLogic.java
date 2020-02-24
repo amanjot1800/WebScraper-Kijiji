@@ -2,11 +2,17 @@ package logic;
 
 import dal.ItemDAL;
 import entity.Item;
+import org.apache.maven.surefire.shade.org.apache.commons.lang3.ObjectUtils;
 
+import javax.persistence.NoResultException;
+import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ItemLogic extends GenericLogic<Item, ItemDAL> {
 
@@ -33,15 +39,21 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
 
     @Override
     public Item getWithId(int id) {
-        return get(()-> dao().findById(id));
+        return get(() -> dao().findById(id));
     }
 
-    public List<Item> getWithPrice(String price) {
+    public List<Item> getWithPrice(BigDecimal price) {
         return get(()-> dao().findByPrice(price));
     }
 
     public List<Item> getWithTitle(String title) {
-        return get(()-> dao().findByTitle(title));
+        try {
+            return get(() -> dao().findByTitle(title));
+        }
+        catch (NoResultException nre){
+
+        }
+        return null;
     }
 
     public List<Item> getWithDate(String date) {
@@ -60,28 +72,45 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
         return get(()-> dao().findByUrl(url));
     }
 
-    public List<Item> getWithCategory(String categoryId) {
+    public List<Item> getWithCategory(int categoryId) {
         return get(()-> dao().findByCategory(categoryId));
     }
 
-//    public List<Item> search(String search) {
-//        return get(()-> dao().find;
-//    }
+    public List<Item> search(String search) {
+        return get(() -> dao().findContaining(search));
+    }
 
     @Override
     public Item createEntity(Map<String, String[]> parameterMap) {
         Item item = new Item();
-        if (parameterMap.containsKey(ID)){
+
+        if (!parameterMap.get(ID)[0].isEmpty()){
             item.setId(Integer.parseInt(parameterMap.get(ID)[0]));
         }
 
+        item.setDescription(parameterMap.get(DESCRIPTION)[0]);
+        item.setLocation(parameterMap.get(LOCATION)[0]);
+
+        String price = parameterMap.get(PRICE)[0].replaceAll("[^.0-9]","");
+        if (!price.equals("")){
+            item.setPrice(new BigDecimal(price));
+        }
         item.setTitle(parameterMap.get(TITLE)[0]);
 
-        SimpleDateFormat smf = new SimpleDateFormat("dd-MM-yyyy");
-        smf.parse("0545455");
+        SimpleDateFormat smf = new SimpleDateFormat("dd/MM/yyyy");
+        Date todaysDate = null;
+        try {
+            todaysDate = smf.parse(smf.format(new Date()));
+            item.setDate(smf.parse(parameterMap.get(DATE)[0]));
+        }
+        catch (ParseException | NullPointerException ex){
+            item.setDate(todaysDate);
+        }
 
+        item.setUrl(parameterMap.get(URL)[0]);
+        item.setId(Integer.parseInt(parameterMap.get(ID)[0]));
 
-        return null;
+        return item;
     }
 
     @Override
@@ -96,7 +125,8 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
 
     @Override
     public List<?> extractDataAsList(Item item) {
-        return null;
+        return Arrays.asList(item.getId(), item.getImage().getId(), item.getCategory().getId(), item.getPrice(),
+                item.getTitle(), item.getDate(), item.getLocation(), item.getDescription(), item.getUrl());
     }
 
 

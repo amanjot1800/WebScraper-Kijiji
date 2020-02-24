@@ -2,23 +2,21 @@ package logic;
 
 import dal.ImageDAL;
 import entity.Image;
+import javax.persistence.NoResultException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class ImageLogic extends GenericLogic<Image, ImageDAL> {
 
-
     public static final String PATH = "path";
     public static final String NAME = "name";
     public static final String URL = "url";
     public static final String ID = "id";
 
-
     public ImageLogic() {
         super(new ImageDAL());
     }
-
 
     @Override
     public List<Image> getAll() {
@@ -39,20 +37,27 @@ public class ImageLogic extends GenericLogic<Image, ImageDAL> {
     }
 
     public Image getWithName(String name) {
-        return get(()-> dao().findByName(name));
-    }
+        try {
+            return get(() -> dao().findByName(name));
+        }catch (NoResultException ex){
 
-
-//        public List<Image> search(String search) {
-//        return get(()-> dao().find;
-//    }
-
-
-    @Override
-    public Image createEntity(Map<String, String[]> requestData) {
+        }
         return null;
     }
 
+    public List<Image> search(String search){
+        return get(()->dao().findContaining(search));
+    }
+
+    @Override
+    public Image createEntity(Map<String, String[]> parameterMap) {
+        Image image = new Image();
+        image.setName(parameterMap.get(NAME)[0]);
+        image.setPath(parameterMap.get(PATH)[0]);
+        image.setUrl(parameterMap.get(URL)[0]);
+
+        return image;
+    }
 
     @Override
     public List<String> getColumnNames() {
@@ -68,7 +73,5 @@ public class ImageLogic extends GenericLogic<Image, ImageDAL> {
     public List<?> extractDataAsList(Image e) {
         return Arrays.asList(e.getId(), e.getName(), e.getPath(), e.getUrl());
     }
-
-
 
 }

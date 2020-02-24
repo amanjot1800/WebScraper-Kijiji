@@ -32,18 +32,43 @@ public class Kijiji {
         return downloadPage(URL_NEWEST_COMPUTER_ACCESSORIES);
     }
 
+
     public Kijiji findAllItems() {
         itemElements = doc.getElementsByAttribute(ATTRIBUTE_ID);
         return this;
     }
 
-    /**
-     * 
-     * @param callback
-     * @return
-     * @deprecated
-     */
-    @Deprecated
+
+
+    public Kijiji processItems(Consumer<KijijiItem> callback){
+        itemElements.forEach((Element element) -> {
+            callback.accept(new ItemBuilder().setElement(element).build());
+        });
+        return this;
+    }
+
+    public static void main(String[] args) throws IOException {
+        
+        Consumer<KijijiItem> saveItems = (KijijiItem item) -> {
+            System.out.println(item);
+        };
+
+        Kijiji kijiji = new Kijiji();
+        
+        kijiji.downloadDefaultPage();
+        kijiji.findAllItems();
+        kijiji.processItems(saveItems);
+    }
+}
+
+
+/**
+ *
+ * @param callback
+ * @return
+ * @deprecated
+ */
+ /*   @Deprecated
     public Kijiji proccessItemsNoneBuilder(Consumer<BadKijijiItem> callback) {
 //        itemElements.forEach((Element element) -> {
 //            callback.accept( new ItemBuilder().setElement(element).build());
@@ -52,18 +77,4 @@ public class Kijiji {
             callback.accept( new BadKijijiItem(element));
         }
         return this;
-    }
-
-    public static void main(String[] args) throws IOException {
-        
-        Consumer<BadKijijiItem> saveItemsNoneBuilder = (BadKijijiItem item) -> {
-            System.out.println(item);
-        };
-
-        Kijiji kijiji = new Kijiji();
-        
-        kijiji.downloadDefaultPage();
-        kijiji.findAllItems();
-        kijiji.proccessItemsNoneBuilder(saveItemsNoneBuilder);
-    }
-}
+    }*/
