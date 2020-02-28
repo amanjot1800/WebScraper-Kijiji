@@ -30,20 +30,19 @@ public class KijijiView extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"KijijiStyle.css\">");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"style/KijijiStyle.css\">");
             out.println("<title>KijijiView</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<div class=\"center-column\">");
-            out.println("<div class=\"item\">");
-            out.println("<div class=\"image\">");
 
             ItemLogic logic = new ItemLogic();
             List<Item> entities = logic.getAll();
 
             for (Item item: entities) {
 
-
+                out.println("<div class=\"center-column\">");
+                out.println("<div class=\"item\">");
+                out.println("<div class=\"image\">");
                 out.println("<img src=\"image\\" + item.getImage().getPath() +"\" style=\"max-width: 250px; max-height: 200px;\" />");
                 out.println("</div>");
                 out.println("<div class=\"details\">");
@@ -59,13 +58,7 @@ public class KijijiView extends HttpServlet {
                 }
                 out.println("</div>");
                 out.println("<div class=\"date\">");
-                Date date = item.getDate();
-                if (date==null){
-                    out.println("Date posted: unavailable");
-
-                }else {
-                    out.println("Date posted: " + date);
-                }
+                out.println("Date posted: " + item.getDate());
                 out.println("</div>");
                 out.println("<div class=\"location\">");
                 out.println("Location: " + item.getLocation());
@@ -73,11 +66,10 @@ public class KijijiView extends HttpServlet {
                 out.println("<div class=\"description\">");
                 out.println(item.getDescription());
                 out.println("</div>");
+                out.println("</div>");
+                out.println("</div>");
+                out.println("</div>");
             }
-
-            out.println("</div>");
-            out.println("</div>");
-            out.println("</div>");
 
             out.println("</body>");
             out.println("</html>");
@@ -175,79 +167,3 @@ public class KijijiView extends HttpServlet {
     }
 
 }
-
-
-//   out.println("<style>");
-//           out.println("/* \n" +
-//           "    Created on : Jan 13, 2020, 9:32:21 PM\n" +
-//           "    Author     : Shariar (Shawn) Emami\n" +
-//           "*/\n" +
-//           "\n" +
-//           "/*border: 3px solid #73AD21;*/\n" +
-//           "\n" +
-//           ".center-column {\n" +
-//           "    display:block;\n" +
-//           "    margin: auto;\n" +
-//           "    width: 80%;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".item {\n" +
-//           "    float:left;\n" +
-//           "    display:block;\n" +
-//           "    width:100%;\n" +
-//           "    padding: 10px;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".image {\n" +
-//           "    float:left;\n" +
-//           "    display:block;\n" +
-//           "    padding: 10px;\n" +
-//           "    min-width: 250px;\n" +
-//           "    min-height: 200px;\n" +
-//           "    max-width: 250px;\n" +
-//           "    max-height: 200px;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".details {\n" +
-//           "    display:block;\n" +
-//           "    overflow: auto;\n" +
-//           "    padding: 0 0 0 20px;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".title {\n" +
-//           "    display: flex;\n" +
-//           "    align-items: center;\n" +
-//           "    overflow: auto;\n" +
-//           "    padding: 0 0 10px 5px;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".price {\n" +
-//           "    display: flex;\n" +
-//           "    align-items: center;\n" +
-//           "    overflow: auto;\n" +
-//           "    padding: 0 0 10px 5px;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".date {\n" +
-//           "    vertical-align:middle;\n" +
-//           "    display:block;\n" +
-//           "    float:left;\n" +
-//           "    overflow: auto;\n" +
-//           "    padding: 0 5px 10px 5px;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".location {\n" +
-//           "    vertical-align:middle;\n" +
-//           "    display:block;\n" +
-//           "    overflow: auto;\n" +
-//           "    padding: 0 0 10px 20px;\n" +
-//           "}\n" +
-//           "\n" +
-//           ".description {\n" +
-//           "    vertical-align:middle;\n" +
-//           "    display:block;\n" +
-//           "    overflow: auto;\n" +
-//           "    padding: 0 0 10px 5px;\n" +
-//           "}");
-//
-//           out.println("</style>");

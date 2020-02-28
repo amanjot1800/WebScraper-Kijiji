@@ -1,5 +1,6 @@
 package common;
 
+import java.util.concurrent.TimeUnit;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.startup.Tomcat;
 
@@ -21,11 +22,11 @@ public class TomcatStartUp {
     }
 
     public static void stopAndDestroyTomcat() throws Exception {
-//        tomcat.stop();
-//        tomcat.destroy();
-//        while (tomcat.getServer().getState() != LifecycleState.DESTROYED) {
-//            TimeUnit.NANOSECONDS.sleep(500);
-//        }
-//        tomcat = null;
+        tomcat.stop();
+        tomcat.destroy();
+        while (tomcat.getServer().getState() != LifecycleState.DESTROYED) {
+            TimeUnit.NANOSECONDS.sleep(500);
+        }
+        tomcat = null;
     }
 }

@@ -1,5 +1,6 @@
 package view;
 
+import common.ValidationException;
 import entity.Account;
 import logic.AccountLogic;
 import java.io.IOException;
@@ -125,16 +126,27 @@ public class CreateAccount extends HttpServlet {
         AccountLogic aLogic = new AccountLogic();
         String username = request.getParameter( AccountLogic.USER);
         if(aLogic.getAccountWithUser(username)==null){
-            Account account = aLogic.createEntity( request.getParameterMap());
-            aLogic.add(account);
-        }else{
+
+            try {
+                Account account = aLogic.createEntity(request.getParameterMap());
+                aLogic.add(account);
+                errorMessage = "User added successfully";
+            }
+            catch (ValidationException ex){
+                errorMessage = ex.getMessage();
+            }
+        }
+        else{
             //if duplicate print the error message
             errorMessage = "Username: \"" + username + "\" already exists";
         }
+
+
         if( request.getParameter("add")!=null){
             //if add button is pressed return the same page
             processRequest(request, response);
-        }else if (request.getParameter("view")!=null) {
+        }
+        else if (request.getParameter("view")!=null) {
             //if view button is pressed redirect to the appropriate table
             response.sendRedirect("AccountTable");
         }

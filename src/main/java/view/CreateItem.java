@@ -1,10 +1,12 @@
 package view;
 
-import entity.Account;
+import common.ValidationException;
 import entity.Category;
+import entity.Image;
 import entity.Item;
+import logic.CategoryLogic;
+import logic.ImageLogic;
 import logic.ItemLogic;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -14,7 +16,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 
 @WebServlet(name = "CreateItem", urlPatterns = {"/CreateItem"})
 public class CreateItem extends HttpServlet {
@@ -115,26 +116,65 @@ public class CreateItem extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         log("POST");
-
         ItemLogic iLogic = new ItemLogic();
-        String item = request.getParameter(ItemLogic.TITLE);
-        if(iLogic.getWithTitle(item) == null){
-            Item itm = iLogic.createEntity(request.getParameterMap());
-            iLogic.add(itm);
+        ImageLogic imageLogic = new ImageLogic();
+        CategoryLogic categoryLogic = new CategoryLogic();
 
+        String image_id = request.getParameter(ItemLogic.IMAGE_ID);
+        String category_id = request.getParameter(ItemLogic.CATEGORY_ID);
+
+
+        if(iLogic.getWithUrl(request.getParameter(ItemLogic.URL))==null){
+
+            try {
+
+
+                Item itm = iLogic.createEntity(request.getParameterMap());
+
+                if (iLogic.getWithId(Integer.parseInt(request.getParameter(ItemLogic.ID)))!=null){
+                    throw new ValidationException("Item with ID " + request.getParameter(ItemLogic.ID)+ " already exists");
+                }
+
+                if (image_id.isEmpty()){
+                    throw new ValidationException("Image ID cannot be empty");
+                }
+
+                Image image = imageLogic.getWithId(Integer.parseInt(image_id));
+                if (image==null){
+                   throw new ValidationException("Image ID does not exist");
+                }
+
+                if (category_id.isEmpty()){
+                    throw new ValidationException("Category ID cannot be null");
+                }
+
+                Category category = categoryLogic.getWithId(Integer.parseInt(category_id));
+                if (category==null){
+                    throw new ValidationException("Category ID does not exist");
+                }
+
+                itm.setImage(image);
+                itm.setCategory(category);
+                iLogic.add(itm);
+                errorMessage = "Item added successfully";
+
+            }
+           catch (ValidationException ex){
+               errorMessage = ex.getMessage();
+           }
         }else{
-
-            errorMessage = "Item: \"" + item + "\" already exists";
+            errorMessage = "Item with same url: \"" + request.getParameter(ItemLogic.URL) + "\" already exists";
         }
-        if(request.getParameter("add")!=null){
 
+        if(request.getParameter("add")!=null){
             processRequest(request, response);
 
-        }else if(request.getParameter("view")!=null) {
-
+        }
+        else if(request.getParameter("view")!=null) {
             response.sendRedirect("ItemTable");
         }
     }
+
 
     @Override
     public String getServletInfo() {

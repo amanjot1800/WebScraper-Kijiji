@@ -37,7 +37,7 @@ public class ItemDAL extends GenericDAL<Item>{
     public List<Item> findByPrice(BigDecimal price){
         Map<String, Object> map = new HashMap<>();
         map.put("price", price);
-        return findResults( "Item.findById", map);
+        return findResults( "Item.findByPrice", map);
 
 
     }

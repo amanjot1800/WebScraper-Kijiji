@@ -1,5 +1,6 @@
 package logic;
 
+import common.ValidationException;
 import dal.CategoryDAL;
 import entity.Category;
 import entity.Item;
@@ -45,18 +46,38 @@ public class CategoryLogic extends GenericLogic<Category,CategoryDAL> {
 
     @Override
     public Category createEntity(Map<String, String[]> parameterMap) {
+
         Category category = new Category();
-        if (parameterMap.containsKey(ID)){
-            category.setId(Integer.parseInt(parameterMap.get(ID)[0]));
+        String title = parameterMap.get(TITLE)[0];
+        String url = parameterMap.get(URL)[0];
+
+        if (parameterMap.containsKey(ID)) {
+            String id = parameterMap.get(ID)[0];
+            try {
+                category.setId(Integer.parseInt(id));
+            } catch (NumberFormatException ex) {
+                throw new ValidationException("Id should be number");
+            }
         }
 
-        category.setTitle(parameterMap.get(TITLE)[0]);
-        category.setUrl(parameterMap.get(URL)[0]);
+        if (title==null || title.isEmpty()){
+            throw new ValidationException("Title cannot be null");
+        }
+        else if (title.length()>255){
+            throw new ValidationException("Title can only be 255 characters long");
+        }
+        else category.setTitle(title);
+
+        if (url==null || url.isEmpty()){
+            throw new ValidationException("url cannot be null");
+        }
+        else if (url.length()>255){
+            throw new ValidationException("url cannot be more than 255 characters");
+        }
+        else category.setUrl(url);
 
         return category;
     }
-
-
 
     @Override
     public List<String> getColumnNames() {
@@ -72,7 +93,5 @@ public class CategoryLogic extends GenericLogic<Category,CategoryDAL> {
     public List<?> extractDataAsList(Category e) {
         return Arrays.asList(e.getId(), e.getTitle(), e.getUrl());
     }
-
-
 
 }

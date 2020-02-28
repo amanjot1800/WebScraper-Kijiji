@@ -1,5 +1,6 @@
 package logic;
 
+import common.ValidationException;
 import dal.ImageDAL;
 import entity.Image;
 import javax.persistence.NoResultException;
@@ -36,13 +37,8 @@ public class ImageLogic extends GenericLogic<Image, ImageDAL> {
         return get(()-> dao().findByPath(path));
     }
 
-    public Image getWithName(String name) {
-        try {
+    public List<Image> getWithName(String name) {
             return get(() -> dao().findByName(name));
-        }catch (NoResultException ex){
-
-        }
-        return null;
     }
 
     public List<Image> search(String search){
@@ -52,9 +48,45 @@ public class ImageLogic extends GenericLogic<Image, ImageDAL> {
     @Override
     public Image createEntity(Map<String, String[]> parameterMap) {
         Image image = new Image();
-        image.setName(parameterMap.get(NAME)[0]);
-        image.setPath(parameterMap.get(PATH)[0]);
-        image.setUrl(parameterMap.get(URL)[0]);
+
+        String name = parameterMap.get(NAME)[0];
+        String path = parameterMap.get(PATH)[0];
+        String url = parameterMap.get(URL)[0];
+
+        if (parameterMap.containsKey(ID)) {
+            String id = parameterMap.get(ID)[0];
+            try {
+                image.setId(Integer.parseInt(id));
+            } catch (NumberFormatException ex) {
+                throw new ValidationException("Id should be number");
+            }
+        }
+
+        if (name==null || name.isEmpty()){
+            throw new ValidationException("Name cannot be null");
+        }
+        else if (name.length()>255){
+            throw new ValidationException("Name can only be 255 characters long");
+        }
+        else image.setName(name);
+
+        if (path==null || path.isEmpty()){
+            throw new ValidationException("Path cannot be null");
+        }
+        else if (path.length()>255){
+            throw new ValidationException("Path cannot be more than 255 characters");
+        }
+        else image.setPath(path);
+
+
+        if (url==null || url.isEmpty()){
+            throw new ValidationException("url cannot be null");
+        }
+        else if (url.length()>255){
+            throw new ValidationException("url cannot be more than 255 characters");
+        }
+        else image.setUrl(url);
+
 
         return image;
     }

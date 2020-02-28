@@ -35,10 +35,10 @@ public class ImageDAL extends GenericDAL<Image> {
         return findResult( "Image.findByPath", map);
     }
 
-    public Image findByName(String name){
+    public List<Image> findByName(String name){
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);
-        return findResult( "Image.findByName", map);
+        return findResults( "Image.findByName", map);
     }
 
     public List<Image> findContaining(String search) {

@@ -1,5 +1,6 @@
 package view;
 
+import common.ValidationException;
 import entity.Account;
 import entity.Category;
 import logic.AccountLogic;
@@ -92,8 +93,14 @@ public class CreateCategory extends HttpServlet {
         CategoryLogic cLogic = new CategoryLogic();
         String category = request.getParameter( CategoryLogic.TITLE);
         if(cLogic.getWithTitle(category) == null){
-            Category cat = cLogic.createEntity( request.getParameterMap());
-            cLogic.add(cat);
+            try {
+                Category cat = cLogic.createEntity(request.getParameterMap());
+                cLogic.add(cat);
+                errorMessage = "Category added successfully";
+            }
+            catch (ValidationException ex){
+                errorMessage = ex.getMessage();
+            }
         }else{
             //if duplicate print the error message
             errorMessage = "Category: \"" + category + "\" already exists";

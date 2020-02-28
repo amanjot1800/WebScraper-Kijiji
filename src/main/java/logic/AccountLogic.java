@@ -1,7 +1,11 @@
 package logic;
 
+import com.thoughtworks.qdox.model.expression.ShiftRight;
+import common.ValidationException;
 import dal.AccountDAL;
 import entity.Account;
+import org.hibernate.property.access.internal.PropertyAccessStrategyIndexBackRefImpl;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -104,14 +108,52 @@ public class AccountLogic extends GenericLogic<Account,AccountDAL>{
     @Override
     public Account createEntity(Map<String, String[]> parameterMap) {
         Account account = new Account();
+        String name = parameterMap.get(DISPLAY_NAME)[0];
+        String user = parameterMap.get(USER)[0];
+        String password = parameterMap.get(PASSWORD)[0];
+
         if(parameterMap.containsKey(ID)){
-            account.setId(Integer.parseInt(parameterMap.get(ID)[0]));
+            String id = parameterMap.get(ID)[0];
+            try {
+                account.setId(Integer.parseInt(id));
+            }
+            catch (NumberFormatException ex){
+                throw new ValidationException("Id should be number");
+            }
+//            if (!id.matches("^[0-9]*$")){
+//                throw new ValidationException("Account Id must be numerical");
+//            }
+//            else account.setId(Integer.parseInt(id));
         }
-        account.setDisplayName(parameterMap.get(DISPLAY_NAME)[0]);
-        account.setUser(parameterMap.get(USER)[0]);
-        account.setPassword(parameterMap.get(PASSWORD)[0]);
+
+        if (name == null ||name.isEmpty()){
+            throw new ValidationException("Name cannot be empty or null");
+        }
+        else if (name.length()>45){
+            throw new ValidationException("Name must be less than 45 characters");
+        }
+        else account.setDisplayName(name);
+
+
+        if (user==null || user.isEmpty()){
+            throw new ValidationException("Username cannot be empty or null");
+        }
+        else if (user.length()>45){
+            throw new ValidationException("Username must be less than 45 characters");
+        }
+        else account.setUser(user);
+
+
+        if(password==null || password.isEmpty()){
+            throw new ValidationException("Password cannot be empty or null");
+        }
+        else if (password.length()>45){
+            throw new ValidationException("Password must be less than 45 characters");
+        }
+        else account.setPassword(password);
+
         return account;
-    } 
+    }
 
     @Override
     public List<String> getColumnNames() {

@@ -1,5 +1,7 @@
 package logic;
 
+import com.sun.xml.fastinfoset.util.ValueArrayResourceException;
+import common.ValidationException;
 import dal.ItemDAL;
 import entity.Item;
 import org.apache.maven.surefire.shade.org.apache.commons.lang3.ObjectUtils;
@@ -47,13 +49,7 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
     }
 
     public List<Item> getWithTitle(String title) {
-        try {
             return get(() -> dao().findByTitle(title));
-        }
-        catch (NoResultException nre){
-
-        }
-        return null;
     }
 
     public List<Item> getWithDate(String date) {
@@ -84,18 +80,52 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
     public Item createEntity(Map<String, String[]> parameterMap) {
         Item item = new Item();
 
-        if (!parameterMap.get(ID)[0].isEmpty()){
-            item.setId(Integer.parseInt(parameterMap.get(ID)[0]));
-        }
-
-        item.setDescription(parameterMap.get(DESCRIPTION)[0]);
-        item.setLocation(parameterMap.get(LOCATION)[0]);
-
+        String id = parameterMap.get(ID)[0];
+        String description = parameterMap.get(DESCRIPTION)[0];
+        String location = parameterMap.get(LOCATION)[0];
+        String title = parameterMap.get(TITLE)[0];
         String price = parameterMap.get(PRICE)[0].replaceAll("[^.0-9]","");
-        if (!price.equals("")){
-            item.setPrice(new BigDecimal(price));
+        String url = parameterMap.get(URL)[0];
+
+
+        if (id==null || id.isEmpty()){
+            throw new ValidationException("Id cannot be null");
         }
-        item.setTitle(parameterMap.get(TITLE)[0]);
+        else if (!id.matches("^[0-9]*$")) {
+            throw new ValidationException("Id can only be Integer");
+        }
+        else item.setId(Integer.parseInt(id));
+
+        if (description==null || description.isEmpty()){
+            throw new ValidationException("Description cannot be null");
+        }
+//        else if (description.length()>255){
+//            throw new ValidationException("Description cannot be more than 255 characters");
+//        }
+//        else
+            item.setDescription(description);
+
+        if(location.length()>45){
+            throw new ValidationException("Location can only be 45 characters long");
+        }
+        else item.setLocation(location);
+
+
+        if (!price.isEmpty()) {
+            if (!price.matches("^([0-9]{1,15})([.])([0-9]{2})$")) {
+                throw new ValidationException("Price is not valid");
+            } item.setPrice(new BigDecimal(price));
+        }
+
+
+        if (title==null || title.isEmpty()){
+            throw new ValidationException("Title cannot be null");
+        }
+        else if (title.length()>255){
+            throw new ValidationException("Title cannot be more than 255 characters");
+        }
+        else item.setTitle(title);
+
 
         SimpleDateFormat smf = new SimpleDateFormat("dd/MM/yyyy");
         Date todaysDate = null;
@@ -107,8 +137,13 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
             item.setDate(todaysDate);
         }
 
-        item.setUrl(parameterMap.get(URL)[0]);
-        item.setId(Integer.parseInt(parameterMap.get(ID)[0]));
+        if(url==null || url.isEmpty()){
+            throw new ValidationException("url cannot be null");
+        }
+        else if (url.length()>255){
+            throw new ValidationException("url can only be 255 characters long");
+        }
+        else item.setUrl(parameterMap.get(URL)[0]);
 
         return item;
     }
