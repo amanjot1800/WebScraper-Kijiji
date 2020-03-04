@@ -33,7 +33,7 @@ public class ImageLogicTest extends TestCase {
 
     @AfterAll
     final static void tearDownAfterClass() throws Exception {
-        TomcatStartUp.stopAndDestroyTomcat();
+     //   TomcatStartUp.stopAndDestroyTomcat();
     }
 
     @BeforeEach
@@ -144,9 +144,9 @@ public class ImageLogicTest extends TestCase {
     @Test
     final void testCreateEntityAndAdd() {
         Map<String, String[]> sampleMap = new HashMap<>();
-        sampleMap.put(ImageLogic.NAME, new String[]{"Test Create Image"});
-        sampleMap.put(ImageLogic.PATH, new String[]{"C:\\path\\to\\the\\image.jpg"});
-        sampleMap.put(ImageLogic.URL, new String[]{"www.TestCreateImage.com"});
+        sampleMap.put(ImageLogic.NAME, new String[]{"ImageLogicTest - Name"});
+        sampleMap.put(ImageLogic.PATH, new String[]{"ImageLogicTest - Path"});
+        sampleMap.put(ImageLogic.URL, new String[]{"ImageLogicTest - Url"});
 
         Image returnedImage = logic.createEntity(sampleMap);
         logic.add(returnedImage);

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE xml>
-<Context path="/WebScraper">
-  <Resource auth="Container" driverClassName="com.mysql.cj.jdbc.Driver" factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" initialSize="1" logAbandoned="false" maxActive="100" maxIdle="10" maxWaitMillis="20" minIdle="0" name="jdbc/WebScraper" password="8288" removeAbandoned="true" removeAbandonedTimeout="20" type="javax.sql.DataSource" url="jdbc:mysql://localhost:3306/kijijidb?zeroDateTimeBehavior=convertToNull" username="cst8288"/>
-</Context>

@@ -60,21 +60,3 @@ public class Kijiji {
         kijiji.processItems(saveItems);
     }
 }
-
-
-/**
- *
- * @param callback
- * @return
- * @deprecated
- */
- /*   @Deprecated
-    public Kijiji proccessItemsNoneBuilder(Consumer<BadKijijiItem> callback) {
-//        itemElements.forEach((Element element) -> {
-//            callback.accept( new ItemBuilder().setElement(element).build());
-//        });
-        for (Element element : itemElements) {
-            callback.accept( new BadKijijiItem(element));
-        }
-        return this;
-    }*/

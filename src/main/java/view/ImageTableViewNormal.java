@@ -79,7 +79,7 @@ public class ImageTableViewNormal extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Sample of Category View Normal";
+        return "Sample of Image View Normal";
     }
 
     private static final boolean DEBUG = true;
@@ -95,7 +95,5 @@ public class ImageTableViewNormal extends HttpServlet {
         String message = String.format("[%s] %s", getClass().getSimpleName(), msg);
         getServletContext().log(message, t);
     }
-
-
 
 }

@@ -1,23 +1,27 @@
 package logic;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import entity.Account;
-import java.io.File;
+import common.TomcatStartUp;
+import common.ValidationException;
+import dal.EMFactory;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import org.apache.catalina.Context;
-import org.apache.catalina.startup.Tomcat;
+import java.util.Map;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.IntFunction;
+import javax.persistence.EntityManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.Map;
-import java.util.HashMap;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 /**
  *
@@ -25,202 +29,319 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class AccountLogicTest {
 
-    public static Tomcat tomcat;
-    public static AccountLogic logic;
-    public static Map<String, String[]> sampleMap;
-   
+    private AccountLogic logic;
+    private Account expectedAccount;
 
     @BeforeAll
     final static void setUpBeforeClass() throws Exception {
-        System.out.println(new File("src\\main\\webapp\\").getAbsolutePath());
-        tomcat = new Tomcat();
-        tomcat.enableNaming();
-        tomcat.setPort(8080);
-        Context context = tomcat.addWebapp("/WebScraper", new File("src\\main\\webapp").getAbsolutePath());
-        context.addApplicationListener("dal.EMFactory");
-        tomcat.init();
-        tomcat.start();
+        TomcatStartUp.createTomcat();
     }
-    
-  
 
     @AfterAll
     final static void tearDownAfterClass() throws Exception {
-        tomcat.stop();
+       // TomcatStartUp.stopAndDestroyTomcat();
     }
 
     @BeforeEach
     final void setUp() throws Exception {
-        logic = new AccountLogic();
-       
-         sampleMap = new HashMap<>();
-         sampleMap.put(AccountLogic.DISPLAY_NAME, new String[]{"JUnit 5 test"});
-         sampleMap.put(AccountLogic.USER, new String[]{"junit"});
-         sampleMap.put(AccountLogic.PASSWORD, new String[]{"junit5"});
+        /* **********************************
+         * ***********IMPORTANT**************
+         * **********************************/
+        //we only do this for the test.
+        //always create Entity using logic.
+        //we manually make the account to not rely on any logic functionality , just for testing
+        Account account = new Account();
+        account.setDisplayName("Junit 5 Test");
+        account.setUser("junit");
+        account.setPassword("junit5");
 
+        //get an instance of EntityManager
+        EntityManager em = EMFactory.getEMFactory().createEntityManager();
+        //start a Transaction 
+        em.getTransaction().begin();
+        //add an account to hibernate, account is now managed.
+        //we use merge instead of add so we can get the updated generated ID.
+        expectedAccount = em.merge(account);
+        //commit the changes
+        em.getTransaction().commit();
+        //close EntityManager
+        em.close();
+
+        logic = new AccountLogic();
     }
 
     @AfterEach
     final void tearDown() throws Exception {
+        if (expectedAccount != null) {
+            logic.delete(expectedAccount);
+        }
     }
-    
 
     @Test
     final void testGetAll() {
-        
         //get all the accounts from the DB
         List<Account> list = logic.getAll();
-        assertEquals(list.size(), 1);
-        
-        //store the size of list/ this way we know how many accounts exits in DB
+        //store the size of list, this way we know how many accounts exits in DB
         int originalSize = list.size();
 
-        //create a new Account and save it so we can delete later
-        Account testAccount = logic.createEntity(sampleMap);
-        //add the newly created account to DB
-        logic.add(testAccount);
-
-        //get all the accounts again
-        list = logic.getAll();
-        //the new size of accounts must be 1 larger than original size
-        assertEquals(originalSize + 1, list.size());
-
-        //delete the new account, so DB is reverted back to it original form
-        logic.delete(testAccount);
+        //make sure account was created successfully
+        assertNotNull(expectedAccount);
+        //delete the new account
+        logic.delete(expectedAccount);
 
         //get all accounts again
         list = logic.getAll();
-        //the new size of accounts must be same as original size
-        assertEquals(originalSize, list.size());
+        //the new size of accounts must be one less
+        assertEquals(originalSize - 1, list.size());
     }
-    
-    
-   
-    @Test
-    final void testGetWithId(){
-        
-        //get all accounts
-        List<Account> list = logic.getAll();
-        //use the first account in the list as test Account
-        Account testAccount = list.get(0);
-        //using the id of test account get another account from logic
-        Account returnedAccount = logic.getWithId(testAccount.getId());
-        //the two accounts (testAcounts and returnedAccounts) must be the same
+
+    /**
+     * helper method for testing all account fields
+     *
+     * @param expected
+     * @param actual
+     */
+    private void assertAccountEquals(Account expected, Account actual) {
         //assert all field to guarantee they are the same
-        assertEquals(testAccount.getId(), returnedAccount.getId());
-        assertEquals(testAccount.getDisplayName(), returnedAccount.getDisplayName());
-        assertEquals(testAccount.getUser(), returnedAccount.getUser());
-        assertEquals(testAccount.getPassword(), returnedAccount.getPassword());    
-    
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getDisplayName(), actual.getDisplayName());
+        assertEquals(expected.getUser(), actual.getUser());
+        assertEquals(expected.getPassword(), actual.getPassword());
     }
-    
-    @Test
-    final void testGetAccountWithDisplayName(){
-    
-        List<Account> list = logic.getAll();
-        Account testAccount = list.get(0);
-        Account returnedAccount = logic.getAccountWithDisplayName(testAccount.getDisplayName());
 
-        assertEquals(testAccount.getId(), returnedAccount.getId());
-        assertEquals(testAccount.getDisplayName(), returnedAccount.getDisplayName());
-        assertEquals(testAccount.getUser(), returnedAccount.getUser());
-        assertEquals(testAccount.getPassword(), returnedAccount.getPassword());   
-        
+    @Test
+    final void testGetWithId() {
+        //using the id of test account get another account from logic
+        Account returnedAccount = logic.getWithId(expectedAccount.getId());
+
+        //the two accounts (testAcounts and returnedAccounts) must be the same
+        assertAccountEquals(expectedAccount, returnedAccount);
     }
-    
-     
-    @Test
-   final void testGetAccountWithUser(){
-    
-        List<Account> list = logic.getAll();
-        Account testAccount = list.get(0);
-        Account returnedAccount = logic.getAccountWithUser(testAccount.getUser());
 
-        assertEquals(testAccount.getId(), returnedAccount.getId());
-        assertEquals(testAccount.getDisplayName(), returnedAccount.getDisplayName());
-        assertEquals(testAccount.getUser(), returnedAccount.getUser());
-        assertEquals(testAccount.getPassword(), returnedAccount.getPassword()); 
-    
+    @Test
+    final void testGetAccountWithDisplayName() {
+        Account returnedAccount = logic.getAccountWithDisplayName(expectedAccount.getDisplayName());
+
+        //the two accounts (testAcounts and returnedAccounts) must be the same
+        assertAccountEquals(expectedAccount, returnedAccount);
     }
-    
-    @Test
-    final void testGetAccountsWithPassword(){
-        
-        List<Account> list = logic.getAll();
-        Account testAccount = list.get(0);       
-        List<Account> returnedAccounts = logic.getAccountsWithPassword(testAccount.getPassword());
 
-        for (int i=0; i <returnedAccounts.size(); i++){
-            
-            assertEquals(testAccount.getPassword(), returnedAccounts.get(i).getPassword()); 
+    @Test
+    final void testGetAccountWIthUser() {
+        Account returnedAccount = logic.getAccountWithUser(expectedAccount.getUser());
+
+        //the two accounts (testAcounts and returnedAccounts) must be the same
+        assertAccountEquals(expectedAccount, returnedAccount);
+    }
+
+    @Test
+    final void testGetAccountsWithPassword() {
+        int foundFull = 0;
+        List<Account> returnedAccounts = logic.getAccountsWithPassword(expectedAccount.getPassword());
+        for (Account account : returnedAccounts) {
+            //all accounts must have the same password
+            assertEquals(expectedAccount.getPassword(), account.getPassword());
+            //exactly one account must be the same
+            if (account.getId().equals(expectedAccount.getId())) {
+                assertAccountEquals(expectedAccount, account);
+                foundFull++;
+            }
         }
-
-    }
-    
-     
-    @Test   
-    final void testGetAccountWith(){
-        
-        List<Account> list = logic.getAll();
-        Account testAccount = list.get(0);
-        Account returnedAccount = logic.getAccountWith(testAccount.getUser(), testAccount.getPassword());
-        
-        assertEquals(testAccount.getId(), returnedAccount.getId());
-        assertEquals(testAccount.getDisplayName(), returnedAccount.getDisplayName());
-        assertEquals(testAccount.getUser(), returnedAccount.getUser());
-        assertEquals(testAccount.getPassword(), returnedAccount.getPassword()); 
-        
-    }
-    
-   
-    @Test
-    public void testSearch(){
-        
-        List<Account> list = logic.getAll();
-        Account testAccount = list.get(0);
-        List<Account> returnedAccounts = logic.search(testAccount.getUser());
-        
-        for (int i=0; i < returnedAccounts.size(); i++){
-
-        assertTrue(returnedAccounts.get(i).getDisplayName().contains(list.get(0).getDisplayName()) ||
-                   returnedAccounts.get(i).getUser().contains(list.get(0).getUser()));
-           
-       }
+        assertEquals(1, foundFull, "if zero means not found, if more than one means duplicate");
     }
 
     @Test
-    public void testCreateEntity() {
+    final void testGetAccountWith() {
+        Account returnedAccount = logic.getAccountWith(expectedAccount.getUser(), expectedAccount.getPassword());
+        assertAccountEquals(expectedAccount, returnedAccount);
+    }
+
+    @Test
+    final void testSearch() {
+        int foundFull = 0;
+        //search for a substring of one of the fields in the expectedAccount
+        String searchString = expectedAccount.getDisplayName().substring(3);
+        //in account we only search for display name and user, this is completely based on your design for other entities.
+        List<Account> returnedAccounts = logic.search(searchString);
+        for (Account account : returnedAccounts) {
+            //all accounts must contain the substring
+            assertTrue(account.getDisplayName().contains(searchString) || account.getUser().contains(searchString));
+            //exactly one account must be the same
+            if (account.getId().equals(expectedAccount.getId())) {
+                assertAccountEquals(expectedAccount, account);
+                foundFull++;
+            }
+        }
+        assertEquals(1, foundFull, "if zero means not found, if more than one means duplicate");
+    }
+
+    @Test
+    final void testCreateEntityAndAdd() {
+        Map<String, String[]> sampleMap = new HashMap<>();
+        sampleMap.put(AccountLogic.DISPLAY_NAME, new String[]{"Test Create Entity"});
+        sampleMap.put(AccountLogic.USER, new String[]{"testCreateAccount"});
+        sampleMap.put(AccountLogic.PASSWORD, new String[]{"create"});
+
+        Account returnedAccount = logic.createEntity(sampleMap);
+        logic.add(returnedAccount);
+
+        returnedAccount = logic.getAccountWithUser(returnedAccount.getUser());
+
+        assertEquals(sampleMap.get(AccountLogic.DISPLAY_NAME)[0], returnedAccount.getDisplayName());
+        assertEquals(sampleMap.get(AccountLogic.USER)[0], returnedAccount.getUser());
+        assertEquals(sampleMap.get(AccountLogic.PASSWORD)[0], returnedAccount.getPassword());
+
+        logic.delete(returnedAccount);
+    }
+
+    @Test
+    final void testCreateEntity() {
+        Map<String, String[]> sampleMap = new HashMap<>();
+        sampleMap.put(AccountLogic.ID, new String[]{Integer.toString(expectedAccount.getId())});
+        sampleMap.put(AccountLogic.DISPLAY_NAME, new String[]{expectedAccount.getDisplayName()});
+        sampleMap.put(AccountLogic.USER, new String[]{expectedAccount.getUser()});
+        sampleMap.put(AccountLogic.PASSWORD, new String[]{expectedAccount.getPassword()});
+
+        Account returnedAccount = logic.createEntity(sampleMap);
+
+        assertAccountEquals(expectedAccount, returnedAccount);
+    }
+
+    @Test
+    final void testCreateEntityNullAndEmptyValues() {
+        Map<String, String[]> sampleMap = new HashMap<>();
+        Consumer<Map<String, String[]>> fillMap = (Map<String, String[]> map) -> {
+            map.clear();
+            map.put(AccountLogic.ID, new String[]{Integer.toString(expectedAccount.getId())});
+            map.put(AccountLogic.DISPLAY_NAME, new String[]{expectedAccount.getDisplayName()});
+            map.put(AccountLogic.USER, new String[]{expectedAccount.getUser()});
+            map.put(AccountLogic.PASSWORD, new String[]{expectedAccount.getPassword()});
+        };
+
+        //idealy every test should be in its own method
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.ID, null);
+        assertThrows(NullPointerException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.ID, new String[]{});
+        assertThrows(IndexOutOfBoundsException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.DISPLAY_NAME, null);
+        assertThrows(NullPointerException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.DISPLAY_NAME, new String[]{});
+        assertThrows(IndexOutOfBoundsException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.USER, null);
+        assertThrows(NullPointerException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.USER, new String[]{});
+        assertThrows(IndexOutOfBoundsException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.PASSWORD, null);
+        assertThrows(NullPointerException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.PASSWORD, new String[]{});
+        assertThrows(IndexOutOfBoundsException.class, () -> logic.createEntity(sampleMap));
+    }
+
+    @Test
+    final void testCreateEntityBadLengthValues() {
+        Map<String, String[]> sampleMap = new HashMap<>();
+        Consumer<Map<String, String[]>> fillMap = (Map<String, String[]> map) -> {
+            map.clear();
+            map.put(AccountLogic.ID, new String[]{Integer.toString(expectedAccount.getId())});
+            map.put(AccountLogic.DISPLAY_NAME, new String[]{expectedAccount.getDisplayName()});
+            map.put(AccountLogic.USER, new String[]{expectedAccount.getUser()});
+            map.put(AccountLogic.PASSWORD, new String[]{expectedAccount.getPassword()});
+        };
+
+        IntFunction<String> generateString = (int length) -> {
+            //https://www.baeldung.com/java-random-string#java8-alphabetic
+            return new Random().ints('a', 'z' + 1).limit(length)
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString();
+        };
+
+        //idealy every test should be in its own method
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.ID, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.ID, new String[]{"12b"});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.DISPLAY_NAME, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.DISPLAY_NAME, new String[]{generateString.apply(46)});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.USER, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.USER, new String[]{generateString.apply(46)});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(AccountLogic.PASSWORD, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(AccountLogic.PASSWORD, new String[]{generateString.apply(46)});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+    }
+
+    @Test
+    final void testCreateEntityEdgeValues() {
+        IntFunction<String> generateString = (int length) -> {
+            //https://www.baeldung.com/java-random-string#java8-alphabetic
+            return new Random().ints('a', 'z' + 1).limit(length)
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString();
+        };
         
-     
-       Account testAccount = logic.createEntity(sampleMap);
-       assertEquals(testAccount.getDisplayName(), sampleMap.get(AccountLogic.DISPLAY_NAME)[0]);
-       assertEquals(testAccount.getPassword(), sampleMap.get(AccountLogic.PASSWORD)[0]);
-       assertEquals(testAccount.getUser(), sampleMap.get(AccountLogic.USER)[0]);
+        Map<String, String[]> sampleMap = new HashMap<>();
+        sampleMap.put(AccountLogic.ID, new String[]{Integer.toString(1)});
+        sampleMap.put(AccountLogic.DISPLAY_NAME, new String[]{generateString.apply(1)});
+        sampleMap.put(AccountLogic.USER, new String[]{generateString.apply(1)});
+        sampleMap.put(AccountLogic.PASSWORD, new String[]{generateString.apply(1)});
 
-    } 
+        //idealy every test should be in its own method
+        Account returnedAccount = logic.createEntity(sampleMap);
+        assertEquals(Integer.parseInt(sampleMap.get(AccountLogic.ID)[0]), returnedAccount.getId());
+        assertEquals(sampleMap.get(AccountLogic.DISPLAY_NAME)[0], returnedAccount.getDisplayName());
+        assertEquals(sampleMap.get(AccountLogic.USER)[0], returnedAccount.getUser());
+        assertEquals(sampleMap.get(AccountLogic.PASSWORD)[0], returnedAccount.getPassword());
+        
+        sampleMap = new HashMap<>();
+        sampleMap.put(AccountLogic.ID, new String[]{Integer.toString(1)});
+        sampleMap.put(AccountLogic.DISPLAY_NAME, new String[]{generateString.apply(45)});
+        sampleMap.put(AccountLogic.USER, new String[]{generateString.apply(45)});
+        sampleMap.put(AccountLogic.PASSWORD, new String[]{generateString.apply(45)});
 
-    
+        //idealy every test should be in its own method
+        returnedAccount = logic.createEntity(sampleMap);
+        assertEquals(Integer.parseInt(sampleMap.get(AccountLogic.ID)[0]), returnedAccount.getId());
+        assertEquals(sampleMap.get(AccountLogic.DISPLAY_NAME)[0], returnedAccount.getDisplayName());
+        assertEquals(sampleMap.get(AccountLogic.USER)[0], returnedAccount.getUser());
+        assertEquals(sampleMap.get(AccountLogic.PASSWORD)[0], returnedAccount.getPassword());
+    }
+
     @Test
     final void testGetColumnNames() {
         List<String> list = logic.getColumnNames();
-        List<?> hardCodedList = Arrays.asList("ID", "Display Name", "User", "Password");
-        assertIterableEquals(list, hardCodedList);
+        assertEquals(Arrays.asList("ID", "Display Name", "User", "Password"), list);
     }
 
-    
     @Test
     final void testGetColumnCodes() {
         List<String> list = logic.getColumnCodes();
-        List<?> hardCodedList = Arrays.asList(AccountLogic.ID, AccountLogic.DISPLAY_NAME, AccountLogic.USER, AccountLogic.PASSWORD);
-        assertIterableEquals(list, hardCodedList);
+        assertEquals(Arrays.asList(AccountLogic.ID, AccountLogic.DISPLAY_NAME, AccountLogic.USER, AccountLogic.PASSWORD), list);
     }
 
-    
-    
     @Test
     final void testExtractDataAsList() {
-        Account testAccount = logic.getAll().get(0);
-        assertEquals(Arrays.asList(testAccount.getId(), testAccount.getDisplayName(), testAccount.getUser(), testAccount.getPassword()), logic.extractDataAsList(testAccount));
+        List<?> list = logic.extractDataAsList(expectedAccount);
+        assertEquals(expectedAccount.getId(), list.get(0));
+        assertEquals(expectedAccount.getDisplayName(), list.get(1));
+        assertEquals(expectedAccount.getUser(), list.get(2));
+        assertEquals(expectedAccount.getPassword(), list.get(3));
     }
-    
 }

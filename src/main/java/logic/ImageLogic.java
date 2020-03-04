@@ -3,7 +3,6 @@ package logic;
 import common.ValidationException;
 import dal.ImageDAL;
 import entity.Image;
-import javax.persistence.NoResultException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +85,6 @@ public class ImageLogic extends GenericLogic<Image, ImageDAL> {
             throw new ValidationException("url cannot be more than 255 characters");
         }
         else image.setUrl(url);
-
 
         return image;
     }

@@ -1,8 +1,8 @@
-    package logic;
+package logic;
 
 import common.TomcatStartUp;
+import common.ValidationException;
 import dal.EMFactory;
-import entity.Account;
 import entity.Category;
 import entity.Image;
 import entity.Item;
@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import javax.persistence.EntityManager;
 import junit.framework.TestCase;
 import org.junit.jupiter.api.AfterAll;
@@ -17,8 +18,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
     public class ItemLogicTest extends TestCase {
@@ -238,7 +237,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         sampleMap.put(ItemLogic.ID, new String[]{"1111"});
         sampleMap.put(ItemLogic.PRICE, new String[]{"19.00"});
         sampleMap.put(ItemLogic.TITLE, new String[]{"Test Item"});
-        sampleMap.put(ItemLogic.DATE, new String[]{"2020-02-28"});
         sampleMap.put(ItemLogic.LOCATION, new String[]{"Java Island"});
         sampleMap.put(ItemLogic.DESCRIPTION, new String[]{"This is a test Item"});
         sampleMap.put(ItemLogic.URL, new String[]{"www.sampleTestItem.com"});
@@ -255,7 +253,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         assertEquals(category.getId(), returnedItem.getCategory().getId());
         assertEquals(sampleMap.get(ItemLogic.PRICE)[0], returnedItem.getPrice().toString());
         assertEquals(sampleMap.get(ItemLogic.TITLE)[0], returnedItem.getTitle());
-        assertEquals(sampleMap.get(ItemLogic.DATE)[0], returnedItem.getDate().toString());
         assertEquals(sampleMap.get(ItemLogic.LOCATION)[0], returnedItem.getLocation());
         assertEquals(sampleMap.get(ItemLogic.DESCRIPTION)[0], returnedItem.getDescription());
         assertEquals(sampleMap.get(ItemLogic.URL)[0], returnedItem.getUrl());
@@ -270,7 +267,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         sampleMap.put(ItemLogic.ID, new String[]{Integer.toString(expectedItem.getId())});
         sampleMap.put(ItemLogic.PRICE, new String[]{expectedItem.getPrice().toString()});
         sampleMap.put(ItemLogic.TITLE, new String[]{expectedItem.getTitle()});
-        sampleMap.put(ItemLogic.DATE, new String[]{expectedItem.getDate().toString()});
         sampleMap.put(ItemLogic.LOCATION, new String[]{expectedItem.getLocation()});
         sampleMap.put(ItemLogic.DESCRIPTION, new String[]{expectedItem.getDescription()});
         sampleMap.put(ItemLogic.URL, new String[]{expectedItem.getUrl()});
@@ -291,7 +287,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
             map.put(ItemLogic.ID, new String[]{Integer.toString(expectedItem.getId())});
             map.put(ItemLogic.PRICE, new String[]{expectedItem.getPrice().toString()});
             map.put(ItemLogic.TITLE, new String[]{expectedItem.getTitle()});
-            map.put(ItemLogic.DATE, new String[]{expectedItem.getDate().toString()});
             map.put(ItemLogic.LOCATION, new String[]{expectedItem.getLocation()});
             map.put(ItemLogic.DESCRIPTION, new String[]{expectedItem.getDescription()});
             map.put(ItemLogic.URL, new String[]{expectedItem.getUrl()});
@@ -315,11 +310,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         sampleMap.replace(ItemLogic.TITLE, new String[]{});
         assertThrows(IndexOutOfBoundsException.class, () -> logic.createEntity(sampleMap));
 
-        fillMap.accept(sampleMap);
-        sampleMap.replace(ItemLogic.DATE, null);
-        assertThrows(NullPointerException.class, () -> logic.createEntity(sampleMap));
-        sampleMap.replace(ItemLogic.DATE, new String[]{});
-        assertThrows(IndexOutOfBoundsException.class, () -> logic.createEntity(sampleMap));
 
         fillMap.accept(sampleMap);
         sampleMap.replace(ItemLogic.LOCATION, null);
@@ -340,10 +330,110 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         assertThrows(IndexOutOfBoundsException.class, () -> logic.createEntity(sampleMap));
     }
 
+    @Test
+    final void testCreateEntityBadLengthValues() {
+        Map<String, String[]> sampleMap = new HashMap<>();
+        Consumer<Map<String, String[]>> fillMap = (Map<String, String[]> map) -> {
+            map.clear();
+            map.put(ItemLogic.ID, new String[]{Integer.toString(expectedItem.getId())});
+            map.put(ItemLogic.PRICE, new String[]{expectedItem.getPrice().toString()});
+            map.put(ItemLogic.TITLE, new String[]{expectedItem.getTitle()});
+            map.put(ItemLogic.LOCATION, new String[]{expectedItem.getLocation()});
+            map.put(ItemLogic.DESCRIPTION, new String[]{expectedItem.getDescription()});
+            map.put(ItemLogic.URL, new String[]{expectedItem.getUrl()});
+        };
+
+        IntFunction<String> generateString = (int length) -> {
+            //https://www.baeldung.com/java-random-string#java8-alphabetic
+            return new Random().ints('a', 'z' + 1).limit(length)
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString();
+        };
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(ItemLogic.ID, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(ItemLogic.ID, new String[]{"12b"});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(ItemLogic.PRICE, new String[]{"12345678970123456.1234"}); //bad price
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(ItemLogic.TITLE, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(ItemLogic.TITLE, new String[]{generateString.apply(256)});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
 
 
+        fillMap.accept(sampleMap);
+        sampleMap.replace(ItemLogic.LOCATION, new String[]{generateString.apply(46)});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(ItemLogic.DESCRIPTION, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+       
+
+        fillMap.accept(sampleMap);
+        sampleMap.replace(ItemLogic.URL, new String[]{""});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+        sampleMap.replace(ItemLogic.URL, new String[]{generateString.apply(256)});
+        assertThrows(ValidationException.class, () -> logic.createEntity(sampleMap));
+
+    }
+
+    @Test
+    final void testCreateEntityEdgeValues() {
+        IntFunction<String> generateString = (int length) -> {
+            //https://www.baeldung.com/java-random-string#java8-alphabetic
+            return new Random().ints('a', 'z' + 1).limit(length)
+                    .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString();
+        };
+
+        Map<String, String[]> sampleMap = new HashMap<>();
+        sampleMap.put(ItemLogic.ID, new String[]{Integer.toString(1)});
+        sampleMap.put(ItemLogic.PRICE, new String[]{"1.1"});
+        sampleMap.put(ItemLogic.TITLE, new String[]{generateString.apply(1)});
+        sampleMap.put(ItemLogic.DATE,  new String[]{new SimpleDateFormat("dd/MM/yyyy").format(new Date())});
+        sampleMap.put(ItemLogic.LOCATION, new String[]{generateString.apply(1)});
+        sampleMap.put(ItemLogic.DESCRIPTION, new String[]{generateString.apply(1)});
+        sampleMap.put(ItemLogic.URL, new String[]{generateString.apply(1)});
 
 
+        Item returnedItem = logic.createEntity(sampleMap);
+
+        assertEquals(Integer.parseInt(sampleMap.get(AccountLogic.ID)[0]), (int) returnedItem.getId());
+        assertEquals(sampleMap.get(ItemLogic.PRICE)[0], returnedItem.getPrice().toString());
+        assertEquals(sampleMap.get(ItemLogic.TITLE)[0], returnedItem.getTitle());
+        assertEquals(sampleMap.get(ItemLogic.DATE)[0], new SimpleDateFormat("dd/MM/yyyy").format(returnedItem.getDate()));
+        assertEquals(sampleMap.get(ItemLogic.LOCATION)[0], returnedItem.getLocation());
+        assertEquals(sampleMap.get(ItemLogic.DESCRIPTION)[0], returnedItem.getDescription());
+        assertEquals(sampleMap.get(ItemLogic.URL)[0], returnedItem.getUrl());
+
+
+        sampleMap = new HashMap<>();
+        sampleMap.put(ItemLogic.ID, new String[]{Integer.toString(1)});
+        sampleMap.put(ItemLogic.PRICE, new String[]{"1234567890123.12"});
+        sampleMap.put(ItemLogic.TITLE, new String[]{generateString.apply(255)});       
+        sampleMap.put(ItemLogic.DATE, new String[]{(new SimpleDateFormat("dd/MM/yyyy").format(new Date()))});
+        sampleMap.put(ItemLogic.LOCATION, new String[]{generateString.apply(45)});
+        sampleMap.put(ItemLogic.DESCRIPTION, new String[]{generateString.apply(255)});
+        sampleMap.put(ItemLogic.URL, new String[]{generateString.apply(255)});
+
+
+        returnedItem = logic.createEntity(sampleMap);
+
+        assertEquals(Integer.parseInt(sampleMap.get(AccountLogic.ID)[0]), (int) returnedItem.getId());
+        assertEquals(sampleMap.get(ItemLogic.PRICE)[0], returnedItem.getPrice().toString());
+        assertEquals(sampleMap.get(ItemLogic.TITLE)[0], returnedItem.getTitle());
+        assertEquals(sampleMap.get(ItemLogic.DATE)[0], new SimpleDateFormat("dd/MM/yyyy").format(returnedItem.getDate()));
+        assertEquals(sampleMap.get(ItemLogic.LOCATION)[0], returnedItem.getLocation());
+        assertEquals(sampleMap.get(ItemLogic.DESCRIPTION)[0], returnedItem.getDescription());
+        assertEquals(sampleMap.get(ItemLogic.URL)[0], returnedItem.getUrl());
+    }
 
 
     @Test

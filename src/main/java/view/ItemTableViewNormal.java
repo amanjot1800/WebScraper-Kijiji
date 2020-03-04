@@ -46,7 +46,7 @@ public class ItemTableViewNormal extends HttpServlet {
             out.printf("<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>", logic.getColumnNames().toArray());
 
             out.println("</table>");
-           // out.printf("<div style=\"text-align: center;\"><pre>%s</pre></div>", toStringMap(request.getParameterMap()));
+            out.printf("<div style=\"text-align: center;\"><pre>%s</pre></div>", toStringMap(request.getParameterMap()));
             out.println("</body>");
             out.println("</html>");
         }
@@ -79,7 +79,7 @@ public class ItemTableViewNormal extends HttpServlet {
 
     @Override
     public String getServletInfo() {
-        return "Sample of Category View Normal";
+        return "Sample of Item View Normal";
     }
 
     private static final boolean DEBUG = true;

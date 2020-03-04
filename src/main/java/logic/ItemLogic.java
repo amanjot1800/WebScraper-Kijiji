@@ -1,12 +1,8 @@
 package logic;
 
-import com.sun.xml.fastinfoset.util.ValueArrayResourceException;
 import common.ValidationException;
 import dal.ItemDAL;
 import entity.Item;
-import org.apache.maven.surefire.shade.org.apache.commons.lang3.ObjectUtils;
-
-import javax.persistence.NoResultException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,7 +10,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class ItemLogic extends GenericLogic<Item, ItemDAL> {
 
@@ -37,7 +32,6 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
     public List<Item> getAll() {
         return get(()-> dao().findAll());
     }
-
 
     @Override
     public Item getWithId(int id) {
@@ -87,7 +81,6 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
         String price = parameterMap.get(PRICE)[0].replaceAll("[^.0-9]","");
         String url = parameterMap.get(URL)[0];
 
-
         if (id==null || id.isEmpty()){
             throw new ValidationException("Id cannot be null");
         }
@@ -99,24 +92,22 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
         if (description==null || description.isEmpty()){
             throw new ValidationException("Description cannot be null");
         }
-//        else if (description.length()>255){
-//            throw new ValidationException("Description cannot be more than 255 characters");
-//        }
-//        else
-            item.setDescription(description);
+        else if (description.length()>255){
+            item.setDescription(description.substring(0, 255));
+        }
+        else item.setDescription(description);
 
         if(location.length()>45){
             throw new ValidationException("Location can only be 45 characters long");
         }
         else item.setLocation(location);
 
-
+        
         if (!price.isEmpty()) {
-            if (!price.matches("^([0-9]{1,15})([.])([0-9]{2})$")) {
+            if (!price.matches("^([0-9]{1,13})([.])([0-9]{1,2})$")) {
                 throw new ValidationException("Price is not valid");
             } item.setPrice(new BigDecimal(price));
         }
-
 
         if (title==null || title.isEmpty()){
             throw new ValidationException("Title cannot be null");
@@ -125,7 +116,6 @@ public class ItemLogic extends GenericLogic<Item, ItemDAL> {
             throw new ValidationException("Title cannot be more than 255 characters");
         }
         else item.setTitle(title);
-
 
         SimpleDateFormat smf = new SimpleDateFormat("dd/MM/yyyy");
         Date todaysDate = null;

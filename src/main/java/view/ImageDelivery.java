@@ -28,16 +28,16 @@ public class ImageDelivery extends HttpServlet{
         File file = new File(filename);
         response.setContentLength((int)file.length());
 
+        try(
         FileInputStream in = new FileInputStream(file);
-        OutputStream out = response.getOutputStream();
-
-        byte[] buf = new byte[1024];
-        int count = 0;
-        while ((count = in.read(buf)) >= 0) {
-            out.write(buf, 0, count);
+        OutputStream out = response.getOutputStream())
+        {
+            byte[] buf = new byte[1024];
+            int count = 0;
+            while ((count = in.read(buf)) >= 0) {
+                out.write(buf, 0, count);
+            }
         }
-        out.close();
-        in.close();
 
     }
 

@@ -3,8 +3,6 @@ package logic;
 import common.ValidationException;
 import dal.CategoryDAL;
 import entity.Category;
-import entity.Item;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

@@ -1,7 +1,9 @@
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\dal\ItemDAL.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\common\ValidationException.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\common\EmbededTomcatBuilder.java
+F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\CreateItem.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\logic\ItemLogic.java
+F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\scraper\kijiji\ItemBuilder.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\logic\ImageLogic.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\CategoryTableViewNormal.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\dal\GenericDAL.java
@@ -10,11 +12,12 @@ F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\logic\Ac
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\AccountTableViewFancy.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\CreateAccount.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\logic\CategoryLogic.java
+F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\ImageDelivery.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\dal\EMFactory.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\dal\ImageDAL.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\dal\AccountDAL.java
-F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\scraper\kijiji\BadKijijiItem.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\AccountTableViewNormal.java
+F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\scraper\kijiji\KijijiItem.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\ImageTableViewNormal.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\entity\Image.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\entity\Item.java
@@ -25,5 +28,6 @@ F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\dal\Cate
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\entity\Account.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\scraper\kijiji\Kijiji.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\ItemTableViewNormal.java
+F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\view\KijijiView.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\logic\GenericLogic.java
 F:\ALGONQUIN\eclipse_workspace\WebScraper-Kijiji-Skeleton\src\main\java\common\FileUtility.java

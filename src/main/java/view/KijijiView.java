@@ -1,7 +1,6 @@
 package view;
 
 import common.FileUtility;
-import entity.Category;
 import entity.Image;
 import entity.Item;
 import logic.CategoryLogic;
@@ -104,7 +103,6 @@ public class KijijiView extends HttpServlet {
 
             FileUtility.downloadAndSaveFile(item.getImageUrl(), System.getProperty("user.home") + "\\KijijiImages", item.getId() + ".jpg");
 
-            //create image object
             String imagePath = System.getProperty("user.home") + "\\KijijiImages\\";
 
             imageMap.put(ImageLogic.NAME, new String[] {item.getImageName() });

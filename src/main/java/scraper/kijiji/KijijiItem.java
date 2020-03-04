@@ -108,7 +108,7 @@ public class KijijiItem {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final BadKijijiItem other = (BadKijijiItem) obj;
+        final KijijiItem other = (KijijiItem) obj;
         return Objects.equals(getId(), other.getId());
     }
 

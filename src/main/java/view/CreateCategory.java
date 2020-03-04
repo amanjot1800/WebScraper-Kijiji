@@ -1,11 +1,8 @@
 package view;
 
 import common.ValidationException;
-import entity.Account;
 import entity.Category;
-import logic.AccountLogic;
 import logic.CategoryLogic;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;

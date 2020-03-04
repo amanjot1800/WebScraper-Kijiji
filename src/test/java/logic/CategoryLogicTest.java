@@ -33,7 +33,7 @@ public class CategoryLogicTest {
 
     @AfterAll
     final static void tearDownAfterClass() throws Exception {
-        TomcatStartUp.stopAndDestroyTomcat();
+       // TomcatStartUp.stopAndDestroyTomcat();
     }
 
     @BeforeEach
